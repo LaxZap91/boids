@@ -6,30 +6,29 @@ import "core:slice"
 import rl "vendor:raylib"
 
 // Raylib constants
-SCREEN_WIDTH :: 3000
+SCREEN_WIDTH :: 2000
 SCREEN_HEIGHT :: 2000
 TARGET_FPS :: 60
 
 // Boid render constants
+SPRITE_PATH :: "../assets/boid.png"
 BOID_COLOR :: rl.BLUE
-BOID_DEBUG_COLOR :: rl.RED
-BOID_WIDTH :: 25
-BOID_HEIGHT :: 40
-BOID_WIDTH_HALF :: BOID_WIDTH / 2
-BOID_HEIGHT_HALF :: BOID_HEIGHT / 2
+BOID_DEBUG_COLOR :: rl.GREEN
+BOID_SCALE :: 0.25
 
 // Boid debug drawing
-DRAW_SPEED :: false
-DRAW_RANGE :: false
+BOID_DRAW_SPEED :: false
+BOID_DRAW_RANGE :: false
 
 // Boid simulation constants
 BOID_COUNT :: 300
-BOID_RANGE :: 50
-BOID_SPEED :: 25
-BOID_SEPERATION_PROPORTION :: 15
+BOID_NEIGHBOR_RANGE :: 100
+BOID_SPEED :: 40
+BOID_SEPERATION_PROPORTION :: 40
 BOID_ALIGNMENT_PROPORTION :: 4
-BOID_COHESION_PROPORTION :: 150
-BOID_WALL_AVOIDANCE :: 25
+BOID_COHESION_PROPORTION :: 170
+BOID_WALL_AVOIDANCE :: 15
+BOID_WALL_RANGE :: BOID_NEIGHBOR_RANGE * 4
 
 Boid :: struct {
 	pos: rl.Vector2,
@@ -58,30 +57,24 @@ make_boids :: proc() -> (boids: [BOID_COUNT]Boid) {
 }
 
 // Draws array of boids
-draw_boids :: proc(boids: []Boid) {
-	// Points for base triangle to be rotated
-	base_top_point := rl.Vector2{0, -BOID_HEIGHT_HALF}
-	base_left_point := rl.Vector2{-BOID_WIDTH_HALF, BOID_HEIGHT_HALF}
-	base_right_point := rl.Vector2{BOID_WIDTH_HALF, BOID_HEIGHT_HALF}
-
+draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 	for boid in boids {
 		angle := math.atan2(boid.vel.x, -boid.vel.y)
 
-		// Rotates base triangle and moves to boid position
-		top := rl.Vector2Rotate(base_top_point, angle) + boid.pos
-		left := rl.Vector2Rotate(base_left_point, angle) + boid.pos
-		right := rl.Vector2Rotate(base_right_point, angle) + boid.pos
+		texture_size := rl.Vector2{f32(texture.width / (2 / BOID_SCALE)), f32(texture.height / (2 / BOID_SCALE))}
+		texture_pos := rl.Vector2Rotate(texture_size, angle)
 
 		// Draws boid
-		rl.DrawTriangle(top, left, right, BOID_COLOR)
-		rl.DrawTriangle(boid.pos, left, right, rl.WHITE)
+		rl.DrawTextureEx(texture, boid.pos - texture_pos, angle * rl.RAD2DEG, BOID_SCALE, BOID_COLOR)
 		// Draw velocity
-		when DRAW_SPEED {
-			rl.DrawLineEx(boid.pos, top + boid.vel, 2, BOID_DEBUG_COLOR)
+		when BOID_DRAW_SPEED {
+			// Gets top of triangle
+			top := rl.Vector2Rotate(rl.Vector2{0, -texture_size.y}, angle) + boid.pos
+			rl.DrawLineEx(top, top + boid.vel, 4, BOID_DEBUG_COLOR)
 		}
 		// Draws range
-		when DRAW_RANGE {
-			rl.DrawCircleLinesV(boid.pos, BOID_RANGE, BOID_DEBUG_COLOR)
+		when BOID_DRAW_RANGE {
+			rl.DrawCircleLinesV(boid.pos, BOID_NEIGHBOR_RANGE, BOID_DEBUG_COLOR)
 		}
 	}
 }
@@ -100,7 +93,7 @@ get_neighbors :: proc(boids: []Boid, self: int) -> []Boid {
 		if index == self {continue}
 
 		// Adds boid if in range
-		if get_distance(boid, boids[self]) < BOID_RANGE {
+		if get_distance(boid, boids[self]) < BOID_NEIGHBOR_RANGE {
 			append(&neighbors, boids[index])
 		}
 	}
@@ -157,16 +150,16 @@ cohesion :: proc(boid: ^Boid, neighbors: []Boid) {
 avoid_walls :: proc(boid: ^Boid) {
 	velocity_adjustment: rl.Vector2
 	// Moves boid if touching horizontal wall
-	if boid.pos.x < BOID_RANGE {
+	if boid.pos.x < BOID_WALL_RANGE {
 		velocity_adjustment.x = BOID_WALL_AVOIDANCE
-	} else if boid.pos.x > (SCREEN_WIDTH - BOID_RANGE) {
+	} else if boid.pos.x > (SCREEN_WIDTH - BOID_WALL_RANGE) {
 		velocity_adjustment.x = -BOID_WALL_AVOIDANCE
 	}
 
 	// Moves boid if touching vertical wall
-	if boid.pos.y < BOID_RANGE {
+	if boid.pos.y < BOID_WALL_RANGE {
 		velocity_adjustment.y = BOID_WALL_AVOIDANCE
-	} else if boid.pos.y > (SCREEN_HEIGHT - BOID_RANGE) {
+	} else if boid.pos.y > (SCREEN_HEIGHT - BOID_WALL_RANGE) {
 		velocity_adjustment.y = -BOID_WALL_AVOIDANCE
 	}
 
@@ -176,8 +169,8 @@ avoid_walls :: proc(boid: ^Boid) {
 
 // Clamps boid position on screen
 clamp_position :: proc(boid: ^Boid) {
-	min_clamp := rl.Vector2{BOID_HEIGHT_HALF, BOID_HEIGHT_HALF}
-	max_clamp := rl.Vector2{SCREEN_WIDTH - BOID_HEIGHT_HALF, SCREEN_HEIGHT - BOID_HEIGHT_HALF}
+	min_clamp := rl.Vector2{0, 0}
+	max_clamp := rl.Vector2{SCREEN_WIDTH, SCREEN_HEIGHT}
 	boid.pos = rl.Vector2Clamp(boid.pos, min_clamp, max_clamp)
 }
 
@@ -212,7 +205,14 @@ main :: proc() {
 	// Raylib initialization
 	rl.SetTraceLogLevel(rl.TraceLogLevel.WARNING)
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Boids")
+	defer rl.CloseWindow()
 	rl.SetTargetFPS(TARGET_FPS)
+
+	// Loads boid image
+	boid_image := rl.LoadImage(SPRITE_PATH)
+	defer rl.UnloadImage(boid_image)
+	boid_texture := rl.LoadTextureFromImage(boid_image)
+	defer rl.UnloadTexture(boid_texture)
 
 	// Main loop
 	for !rl.WindowShouldClose() {
@@ -223,10 +223,8 @@ main :: proc() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.WHITE)
 
-		draw_boids(boids[:])
+		draw_boids(boid_texture, boids[:])
 
 		rl.EndDrawing()
 	}
-
-	rl.CloseWindow()
 }

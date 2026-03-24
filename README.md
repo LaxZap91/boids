@@ -12,7 +12,6 @@ An implementation of (Craig Reynolds boids simulation)[https://www.red3d.com/cwr
 
 ## Future Additions
 
-- Sprites
 - Predator/prey behavior
 - Obstacle avoidance
 - UI for controling behavior
