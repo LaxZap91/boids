@@ -61,6 +61,7 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 	for boid in boids {
 		angle := math.atan2(boid.vel.x, -boid.vel.y)
 
+		// Transforms sprite position
 		texture_size := rl.Vector2{f32(texture.width / (2 / BOID_SCALE)), f32(texture.height / (2 / BOID_SCALE))}
 		texture_pos := rl.Vector2Rotate(texture_size, angle)
 
@@ -68,7 +69,7 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 		rl.DrawTextureEx(texture, boid.pos - texture_pos, angle * rl.RAD2DEG, BOID_SCALE, BOID_COLOR)
 		// Draw velocity
 		when BOID_DRAW_SPEED {
-			// Gets top of triangle
+			// Gets top of sprite
 			top := rl.Vector2Rotate(rl.Vector2{0, -texture_size.y}, angle) + boid.pos
 			rl.DrawLineEx(top, top + boid.vel, 4, BOID_DEBUG_COLOR)
 		}
