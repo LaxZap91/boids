@@ -1,20 +1,35 @@
 package main
 
-import "core:fmt"
 import "core:math"
 import "core:math/rand"
 import "core:slice"
 import rl "vendor:raylib"
 
-SCREEN_WIDTH :: 2400
-SCREEN_HEIGHT :: 1200
-
+// Raylib constants
+SCREEN_WIDTH :: 3000
+SCREEN_HEIGHT :: 2000
 TARGET_FPS :: 60
 
-BOID_COUNT :: 200
-BOID_RANGE :: 100
+// Boid render constants
+BOID_COLOR :: rl.BLUE
+BOID_DEBUG_COLOR :: rl.RED
+BOID_WIDTH :: 25
+BOID_HEIGHT :: 40
+BOID_WIDTH_HALF :: BOID_WIDTH / 2
+BOID_HEIGHT_HALF :: BOID_HEIGHT / 2
+
+// Boid debug drawing
+DRAW_SPEED :: false
+DRAW_RANGE :: false
+
+// Boid simulation constants
+BOID_COUNT :: 300
+BOID_RANGE :: 50
 BOID_SPEED :: 25
-BOID_WALL_AVOIDANCE :: 20
+BOID_SEPERATION_PROPORTION :: 15
+BOID_ALIGNMENT_PROPORTION :: 4
+BOID_COHESION_PROPORTION :: 150
+BOID_WALL_AVOIDANCE :: 25
 
 Boid :: struct {
 	pos: rl.Vector2,
@@ -45,9 +60,9 @@ make_boids :: proc() -> (boids: [BOID_COUNT]Boid) {
 // Draws array of boids
 draw_boids :: proc(boids: []Boid) {
 	// Points for base triangle to be rotated
-	base_top_point := rl.Vector2{0, -15}
-	base_left_point := rl.Vector2{-10, 15}
-	base_right_point := rl.Vector2{10, 15}
+	base_top_point := rl.Vector2{0, -BOID_HEIGHT_HALF}
+	base_left_point := rl.Vector2{-BOID_WIDTH_HALF, BOID_HEIGHT_HALF}
+	base_right_point := rl.Vector2{BOID_WIDTH_HALF, BOID_HEIGHT_HALF}
 
 	for boid in boids {
 		angle := math.atan2(boid.vel.x, -boid.vel.y)
@@ -58,19 +73,17 @@ draw_boids :: proc(boids: []Boid) {
 		right := rl.Vector2Rotate(base_right_point, angle) + boid.pos
 
 		// Draws boid
-		rl.DrawTriangle(top, left, right, rl.BLUE)
+		rl.DrawTriangle(top, left, right, BOID_COLOR)
+		rl.DrawTriangle(boid.pos, left, right, rl.WHITE)
 		// Draw velocity
-		// rl.DrawLineEx(boid.pos, top + boid.vel, 2, rl.BLUE)
+		when DRAW_SPEED {
+			rl.DrawLineEx(boid.pos, top + boid.vel, 2, BOID_DEBUG_COLOR)
+		}
 		// Draws range
-		// rl.DrawCircleLinesV(boid.pos, BOID_RANGE, rl.RED)
+		when DRAW_RANGE {
+			rl.DrawCircleLinesV(boid.pos, BOID_RANGE, BOID_DEBUG_COLOR)
+		}
 	}
-
-	// Draws avoidance box
-	// rl.DrawRectangleLines(
-	// 	BOID_RANGE, BOID_RANGE,
-	// 	SCREEN_WIDTH - (2 * BOID_RANGE), SCREEN_HEIGHT - (2 * BOID_RANGE),
-	// 	rl.RED,
-	// )
 }
 
 // Returns distance between two boids
@@ -96,7 +109,7 @@ get_neighbors :: proc(boids: []Boid, self: int) -> []Boid {
 	return neighbors[:]
 }
 
-// Seperates boids
+// Moves boid away from neighbors
 seperation :: proc(boid: ^Boid, neighbors: []Boid) {
 	if len(neighbors) == 0 {return}
 
@@ -107,10 +120,10 @@ seperation :: proc(boid: ^Boid, neighbors: []Boid) {
 	}
 
 	// Adjusts velocity by proportion of displacement
-	boid.vel += displacement / 25
+	boid.vel += displacement / BOID_SEPERATION_PROPORTION
 }
 
-// Aligns direction of nearby boids
+// Aligns boid with neighbors
 alignment :: proc(boid: ^Boid, neighbors: []Boid) {
 	if len(neighbors) == 0 {return}
 
@@ -122,10 +135,10 @@ alignment :: proc(boid: ^Boid, neighbors: []Boid) {
 	average_velocity /= f32(len(neighbors))
 
 	// Adjusts velocity by proportion of average velocity
-	boid.vel += average_velocity / 4
+	boid.vel += average_velocity / BOID_ALIGNMENT_PROPORTION
 }
 
-// Groups boids together
+// Moves boid closer to neighbor
 cohesion :: proc(boid: ^Boid, neighbors: []Boid) {
 	if len(neighbors) == 0 {return}
 
@@ -137,7 +150,7 @@ cohesion :: proc(boid: ^Boid, neighbors: []Boid) {
 	average_position /= f32(len(neighbors))
 
 	// Adjusts velocity by proportion of displacement
-	boid.vel += (boid.pos - average_position) / 100
+	boid.vel += (boid.pos - average_position) / BOID_COHESION_PROPORTION
 }
 
 // Moves boid away from walls
@@ -146,16 +159,14 @@ avoid_walls :: proc(boid: ^Boid) {
 	// Moves boid if touching horizontal wall
 	if boid.pos.x < BOID_RANGE {
 		velocity_adjustment.x = BOID_WALL_AVOIDANCE
-	}
-	else if boid.pos.x > (SCREEN_WIDTH - BOID_RANGE) {
+	} else if boid.pos.x > (SCREEN_WIDTH - BOID_RANGE) {
 		velocity_adjustment.x = -BOID_WALL_AVOIDANCE
 	}
 
 	// Moves boid if touching vertical wall
 	if boid.pos.y < BOID_RANGE {
 		velocity_adjustment.y = BOID_WALL_AVOIDANCE
-	}
-	else if boid.pos.y > (SCREEN_HEIGHT - BOID_RANGE) {
+	} else if boid.pos.y > (SCREEN_HEIGHT - BOID_RANGE) {
 		velocity_adjustment.y = -BOID_WALL_AVOIDANCE
 	}
 
@@ -165,8 +176,8 @@ avoid_walls :: proc(boid: ^Boid) {
 
 // Clamps boid position on screen
 clamp_position :: proc(boid: ^Boid) {
-	min_clamp := rl.Vector2{15, 15}
-	max_clamp := rl.Vector2{SCREEN_WIDTH - 15, SCREEN_HEIGHT - 15}
+	min_clamp := rl.Vector2{BOID_HEIGHT_HALF, BOID_HEIGHT_HALF}
+	max_clamp := rl.Vector2{SCREEN_WIDTH - BOID_HEIGHT_HALF, SCREEN_HEIGHT - BOID_HEIGHT_HALF}
 	boid.pos = rl.Vector2Clamp(boid.pos, min_clamp, max_clamp)
 }
 
@@ -199,6 +210,7 @@ main :: proc() {
 	boids := make_boids()
 
 	// Raylib initialization
+	rl.SetTraceLogLevel(rl.TraceLogLevel.WARNING)
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Boids")
 	rl.SetTargetFPS(TARGET_FPS)
 
