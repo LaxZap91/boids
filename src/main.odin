@@ -14,7 +14,7 @@ TARGET_FPS :: 60
 SPRITE_PATH :: "../assets/boid.png"
 BOID_COLOR :: rl.BLUE
 BOID_DEBUG_COLOR :: rl.GREEN
-BOID_SCALE :: 0.25
+BOID_SCALE :: 0.33
 
 // Boid debug drawing
 BOID_DRAW_SPEED :: false
@@ -62,11 +62,20 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 		angle := math.atan2(boid.vel.x, -boid.vel.y)
 
 		// Transforms sprite position
-		texture_size := rl.Vector2{f32(texture.width / (2 / BOID_SCALE)), f32(texture.height / (2 / BOID_SCALE))}
+		texture_size := rl.Vector2 {
+			(f32(texture.width) / (2 / BOID_SCALE)),
+			(f32(texture.height) / (2 / BOID_SCALE)),
+		}
 		texture_pos := rl.Vector2Rotate(texture_size, angle)
 
 		// Draws boid
-		rl.DrawTextureEx(texture, boid.pos - texture_pos, angle * rl.RAD2DEG, BOID_SCALE, BOID_COLOR)
+		rl.DrawTextureEx(
+			texture,
+			boid.pos - texture_pos,
+			angle * rl.RAD2DEG,
+			BOID_SCALE,
+			BOID_COLOR,
+		)
 		// Draw velocity
 		when BOID_DRAW_SPEED {
 			// Gets top of sprite

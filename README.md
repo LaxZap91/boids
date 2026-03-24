@@ -1,12 +1,12 @@
 # Boids
 
-An implementation of (Craig Reynolds boids simulation)[https://www.red3d.com/cwr/boids/] written in Odin
+An implementation of [Craig Reynolds boids simulation](https://www.red3d.com/cwr/boids/) written in Odin
 
 ## Quick Start
 
 1. Install Odin on your computer
-2. Navigate to project directory
-   `cd path/to/project`
+2. Navigate to src directory
+   `cd path/to/src`
 3. Run the program
    `odin run .`
 
