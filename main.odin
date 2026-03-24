@@ -58,6 +58,12 @@ draw_boids :: proc(boids: []Boid) {
 	}
 }
 
+update_boids :: proc(boids: []Boid) {
+	for &boid in boids {
+		boid.pos += boid.vel
+	}
+}
+
 main :: proc() {
 	// Initialize boids
 	boids := make_boids()
@@ -68,6 +74,9 @@ main :: proc() {
 
 	// Main loop
 	for !rl.WindowShouldClose() {
+		// Update
+		update_boids(boids[:])
+
 		// Draw
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.WHITE)
