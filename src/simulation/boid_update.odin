@@ -9,7 +9,7 @@ get_distance :: proc(boid_1, boid_2: Boid) -> f32 {
 }
 
 // Returns all neighbors of a boid
-boid_get_neighbors :: proc(boids: []Boid, self: int) -> []Boid {
+get_neighbors :: proc( self: int, boids: []Boid, range, angle: f32) -> []Boid {
 	neighbors := make([dynamic]Boid, 0, len(boids))
 	defer delete(neighbors)
 
@@ -17,11 +17,11 @@ boid_get_neighbors :: proc(boids: []Boid, self: int) -> []Boid {
 		if index == self {continue}
 
 		// Adds boid if in range
-		in_range := get_distance(boid, boids[self]) < BOID_NEIGHBOR_RANGE
+		in_range := get_distance(boid, boids[self]) < range
 
 		// Adds boid if in angle
 		dot_product := rl.Vector2DotProduct(boids[self].pos, boid.pos)
-		in_angle := dot_product > (BOID_NEIGHBOR_ANGLE / 180)
+		in_angle := dot_product > (angle / 180)
 
 		if in_range && in_angle {
 			append(&neighbors, boids[index])
@@ -49,7 +49,7 @@ boid_get_predators :: proc(boid: Boid, predators: []Boid) -> []Boid {
 }
 
 // Moves boid away from neighbors
-boid_apply_seperation :: proc(boid: ^Boid, neighbors: []Boid) {
+apply_seperation :: proc(boid: ^Boid, neighbors: []Boid, proportion: f32) {
 	if len(neighbors) == 0 {return}
 
 	// Calculates total displacement
@@ -59,8 +59,7 @@ boid_apply_seperation :: proc(boid: ^Boid, neighbors: []Boid) {
 	}
 
 	// Adjusts velocity by proportion of displacement
-	boid.vel += displacement / BOID_SEPERATION_PROPORTION
-	boid_clamp_speed(boid)
+	boid.vel += displacement / proportion
 }
 
 // Aligns boid with neighbors
@@ -76,7 +75,6 @@ boid_apply_alignment :: proc(boid: ^Boid, neighbors: []Boid) {
 
 	// Adjusts velocity by proportion of average velocity
 	boid.vel += average_velocity / BOID_ALIGNMENT_PROPORTION
-	boid_clamp_speed(boid)
 }
 
 // Moves boid closer to neighbor
@@ -92,7 +90,6 @@ boid_apply_cohesion :: proc(boid: ^Boid, neighbors: []Boid) {
 
 	// Adjusts velocity by proportion of displacement
 	boid.vel += (boid.pos - average_position) / BOID_COHESION_PROPORTION
-	boid_clamp_speed(boid)
 }
 
 // Moves boid away from walls
@@ -114,7 +111,6 @@ boid_apply_avoid_walls :: proc(boid: ^Boid) {
 
 	// Adjusts velocity by factor
 	boid.vel += velocity_adjustment
-	boid_clamp_speed(boid)
 }
 
 // Moves boid away from predators
@@ -129,16 +125,15 @@ boid_flee_predator :: proc(boid: ^Boid, predators: []Boid) {
 
 	// Adjusts velocity by proportion of displacement
 	boid.vel += displacement / BOID_PREDATOR_FLEE_PROPORTION
-	boid_clamp_speed(boid)
 }
 
 // Clamps boid speed
-boid_clamp_speed :: proc(boid: ^Boid) {
-	boid.vel = rl.Vector2ClampValue(boid.vel, BOID_SPEED, BOID_SPEED)
+clamp_speed :: proc(boid: ^Boid, speed: f32) {
+	boid.vel = rl.Vector2ClampValue(boid.vel, speed, speed)
 }
 
 // Clamps boid position on screen
-boid_clamp_position :: proc(boid: ^Boid) {
+clamp_position :: proc(boid: ^Boid) {
 	min_clamp := rl.Vector2{0, 0}
 	max_clamp := rl.Vector2{SCREEN_WIDTH, SCREEN_HEIGHT}
 	boid.pos = rl.Vector2Clamp(boid.pos, min_clamp, max_clamp)
@@ -148,18 +143,19 @@ boid_clamp_position :: proc(boid: ^Boid) {
 update_boids :: proc(boids: []Boid, predators: []Boid) {
 	boids_clone := slice.clone(boids)
 	for &boid, index in boids {
-		neighbors := boid_get_neighbors(boids_clone, index)
+		neighbors := get_neighbors(index, boids_clone, BOID_NEIGHBOR_RANGE, BOID_NEIGHBOR_ANGLE)
 		nearby_predators := boid_get_predators(boid, predators)
 
 		// Adjusts boid velocity by rules
-		boid_apply_seperation(&boid, neighbors)
+		apply_seperation(&boid, neighbors, BOID_SEPERATION_PROPORTION)
 		boid_apply_alignment(&boid, neighbors)
 		boid_apply_cohesion(&boid, neighbors)
 		boid_apply_avoid_walls(&boid)
 		boid_flee_predator(&boid, nearby_predators)
+		clamp_speed(&boid, BOID_SPEED)
 
 		// Moves boid
 		boid.pos += boid.vel
-		// boid_clamp_position(&boid)
+		// clamp_position(&boid)
 	}
 }

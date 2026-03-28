@@ -2,9 +2,9 @@ package simulation
 
 import rl "vendor:raylib"
 
-// Width of raylib window
+// Width of the raylib window
 SCREEN_WIDTH :: 2000
-// Height of raylib window
+// Height of the raylib window
 SCREEN_HEIGHT :: 2000
 // FPS target
 TARGET_FPS :: 60

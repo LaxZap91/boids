@@ -20,14 +20,23 @@ PREDATOR_DRAW_RANGE :: true
 // Enables drawing predator wall
 PREDATOR_DRAW_WALL :: false
 
+// Number of predators to simulate
 PREDATOR_COUNT :: 3
+// Speed of predators
 PREDATOR_SPEED :: 25
+// Range of predators neighborhood
 PREDATOR_NEIGHBOR_RANGE :: 200
+// Angle of predators neighborhood (-angle, angle)
 PREDATOR_NEIGHBOR_ANGLE :: 135
-PREDATOR_SEPERATION_PROPORTION :: 60
-PREDATOR_WALL_AVOIDANCE :: 15
-PREDATOR_WALL_RANGE :: 100 * 2
-PREDATOR_BOID_RANGE_INCREASE :: 150
-PREDATOR_BOID_RANGE :: BOID_PREDATOR_RANGE + (PREDATOR_BOID_RANGE_INCREASE * 2)
+// Proportion of velocity adjustement made by predators moving away from each other
+PREDATOR_SEPERATION_PROPORTION :: 30
+// Range of a predators wall sensing
+PREDATOR_WALL_RANGE :: 300
+// Amount of adjustement made to velicty if the predator is inside a wall
+PREDATOR_WALL_AVOIDANCE :: 30
+// Range that predators sense boids
+PREDATOR_BOID_RANGE :: BOID_PREDATOR_RANGE + 300
+// Angle that predators sense boids (-angle, angle)
 PREDATOR_BOID_ANGLE :: 120
-PREDATOR_CHASE_PROPORTION :: 150
+// Proportion of velocity adjustement made by nearby boids
+PREDATOR_CHASE_PROPORTION :: 50

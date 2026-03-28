@@ -25,13 +25,13 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 		)
 		// Draw speed
 		when BOID_DRAW_SPEED {
-			// Gets top of sprite
 			top := rl.Vector2Rotate(rl.Vector2{0, -texture_size.y}, angle) + boid.pos
 			rl.DrawLineEx(top, top + boid.vel, 4, BOID_DEBUG_COLOR)
 		}
 		// Draws range
 		when BOID_DRAW_RANGE {
 			angle_offset := angle * rl.RAD2DEG - 90
+			// Draws neighbor range
 			rl.DrawCircleSectorLines(
 				boid.pos,
 				BOID_NEIGHBOR_RANGE,
@@ -40,6 +40,7 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 				1,
 				BOID_DEBUG_COLOR,
 			)
+			// Draw predator range
 			rl.DrawCircleLinesV(boid.pos, BOID_PREDATOR_RANGE, BOID_DEBUG_COLOR)
 		}
 	}

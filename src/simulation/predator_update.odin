@@ -3,30 +3,6 @@ package simulation
 import "core:slice"
 import rl "vendor:raylib"
 
-// Returns all neighbors of a predator
-predator_get_neighbors :: proc(predators: []Boid, self: int) -> []Boid {
-	neighbors := make([dynamic]Boid, 0, len(predators))
-	defer delete(neighbors)
-
-	for predator, index in predators {
-		if index == self {continue}
-
-		// Adds predator if in range
-		in_range := get_distance(predator, predators[self]) < PREDATOR_NEIGHBOR_RANGE
-
-		// Adds predator if in angle
-		dot_product := rl.Vector2DotProduct(predators[self].pos, predator.pos)
-		in_angle := dot_product > (PREDATOR_NEIGHBOR_ANGLE / 180)
-
-		if in_range && in_angle {
-			append(&neighbors, predators[index])
-		}
-	}
-	shrink(&neighbors)
-
-	return neighbors[:]
-}
-
 // Gets all boids nearby a predator
 predator_get_boids :: proc(predator: Boid, boids: []Boid) -> []Boid {
 	nearby_boids := make([dynamic]Boid, 0, len(boids))
@@ -47,20 +23,6 @@ predator_get_boids :: proc(predator: Boid, boids: []Boid) -> []Boid {
 	shrink(&nearby_boids)
 
 	return nearby_boids[:]
-}
-
-// Moves predator away from neighbors
-predator_apply_seperation :: proc(predator: ^Boid, neighbors: []Boid) {
-	if len(neighbors) == 0 {return}
-
-	// Calculates total displacement
-	displacement: rl.Vector2
-	for neighbor in neighbors {
-		displacement -= neighbor.pos - predator.pos
-	}
-
-	// Adjusts velocity by proportion of displacement
-	predator.vel += displacement / PREDATOR_SEPERATION_PROPORTION
 }
 
 // Moves predator towards boids
@@ -98,33 +60,29 @@ predator_apply_avoid_walls :: proc(predator: ^Boid) {
 	predator.vel += velocity_adjustment
 }
 
-// Clamps predator speed
-predator_clamp_speed :: proc(predator: ^Boid) {
-	predator.vel = rl.Vector2ClampValue(predator.vel, PREDATOR_SPEED, PREDATOR_SPEED)
-}
-
-// Clamps predator position on screen
-predator_clamp_position :: proc(predator: ^Boid) {
-	min_clamp := rl.Vector2{0, 0}
-	max_clamp := rl.Vector2{SCREEN_WIDTH, SCREEN_HEIGHT}
-	predator.pos = rl.Vector2Clamp(predator.pos, min_clamp, max_clamp)
-}
-
 // Updates predator positions
 update_predators :: proc(predators: []Boid, boids: []Boid) {
 	predators_clone := slice.clone(predators)
 	for &predator, index in predators {
-		neighbors := predator_get_neighbors(predators, index)
+		neighbors := get_neighbors(index, predators, PREDATOR_NEIGHBOR_RANGE, PREDATOR_NEIGHBOR_ANGLE)
 		nearby_boids := predator_get_boids(predator, boids)
 
+		previous_velocity := predator.vel
+
 		// Adjusts predator velocity by rules
-		predator_apply_seperation(&predator, neighbors)
+		apply_seperation(&predator, neighbors, PREDATOR_SEPERATION_PROPORTION)
 		predator_chase_boids(&predator, nearby_boids)
 		predator_apply_avoid_walls(&predator)
-		predator_clamp_speed(&predator)
+		clamp_speed(&predator, PREDATOR_SPEED)
+
+		// Prevents predators sitting still if it is in the center of all nearby boids
+		if rl.Vector2Length(predator.vel) == 0 {
+			predator.vel = previous_velocity
+			clamp_speed(&predator, PREDATOR_SPEED)
+		}
 
 		// Moves predator
 		predator.pos += predator.vel
-		predator_clamp_position(&predator)
+		clamp_position(&predator)
 	}
 }
