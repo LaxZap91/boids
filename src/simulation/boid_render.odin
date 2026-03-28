@@ -10,8 +10,8 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 
 		// Transforms sprite position
 		texture_size := rl.Vector2 {
-			f32(texture.width) / (2 / BOID_SCALE),
-			f32(texture.height) / (2 / BOID_SCALE),
+			(f32(texture.width) / 2) * BOID_SCALE,
+			(f32(texture.height) / 2) * BOID_SCALE,
 		}
 		texture_pos := rl.Vector2Rotate(texture_size, angle)
 
@@ -31,12 +31,21 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 		}
 		// Draws range
 		when BOID_DRAW_RANGE {
-			rl.DrawCircleLinesV(boid.pos, BOID_NEIGHBOR_RANGE, BOID_DEBUG_COLOR)
+			angle_offset := angle * rl.RAD2DEG - 90
+			rl.DrawCircleSectorLines(
+				boid.pos,
+				BOID_NEIGHBOR_RANGE,
+				-BOID_NEIGHBOR_ANGLE + angle_offset,
+				BOID_NEIGHBOR_ANGLE + angle_offset,
+				1,
+				BOID_DEBUG_COLOR,
+			)
+			rl.DrawCircleLinesV(boid.pos, BOID_PREDATOR_RANGE, BOID_DEBUG_COLOR)
 		}
 	}
 
 	when BOID_DRAW_WALL {
-		wall_rect := rl.Rectangle{
+		wall_rect := rl.Rectangle {
 			BOID_WALL_RANGE,
 			BOID_WALL_RANGE,
 			SCREEN_WIDTH - (2 * BOID_WALL_RANGE),

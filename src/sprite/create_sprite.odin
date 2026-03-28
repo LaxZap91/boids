@@ -2,7 +2,7 @@ package sprite
 
 import rl "vendor:raylib"
 
-SPRITE_PATH :: "../assets/boid.png"
+SPRITE_PATH :: "assets/boid.png"
 SPRITE_WIDTH :: 60
 SPRITE_HEIGHT :: 160
 SPRITE_COLOR :: rl.WHITE
@@ -14,8 +14,8 @@ CENTER := rl.Vector2{(SPRITE_WIDTH/2), (SPRITE_HEIGHT/3)}
 
 main :: proc() {
 	rl.SetConfigFlags({.WINDOW_HIDDEN})
-	rl.InitWindow(1, 1, "")
 	rl.SetTraceLogLevel(rl.TraceLogLevel.WARNING)
+	rl.InitWindow(1, 1, "")
 
 	texture := rl.LoadRenderTexture(SPRITE_WIDTH, SPRITE_HEIGHT)
 

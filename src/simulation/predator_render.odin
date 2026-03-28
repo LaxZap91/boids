@@ -10,8 +10,8 @@ draw_predators :: proc(texture: rl.Texture2D, predators: []Boid) {
 
 		// Transforms sprite position
 		texture_size := rl.Vector2 {
-			f32(texture.width) / (2 / PREDATOR_SCALE),
-			f32(texture.height) / (2 / PREDATOR_SCALE),
+			(f32(texture.width) / 2) * PREDATOR_SCALE,
+			(f32(texture.height) / 2) * PREDATOR_SCALE,
 		}
 		texture_pos := rl.Vector2Rotate(texture_size, angle)
 
@@ -31,12 +31,28 @@ draw_predators :: proc(texture: rl.Texture2D, predators: []Boid) {
 		}
 		// Draws range
 		when PREDATOR_DRAW_RANGE {
-			rl.DrawCircleLinesV(predator.pos, PREDATOR_BOID_RANGE, PREDATOR_DEBUG_COLOR)
+			angle_offset := angle * rl.RAD2DEG - 90
+			rl.DrawCircleSectorLines(
+				predator.pos,
+				PREDATOR_NEIGHBOR_RANGE,
+				-PREDATOR_NEIGHBOR_ANGLE + angle_offset,
+				PREDATOR_NEIGHBOR_ANGLE + angle_offset,
+				1,
+				PREDATOR_DEBUG_COLOR,
+			)
+			rl.DrawCircleSectorLines(
+				predator.pos,
+				PREDATOR_BOID_RANGE,
+				-PREDATOR_BOID_ANGLE + angle_offset,
+				PREDATOR_BOID_ANGLE + angle_offset,
+				1,
+				PREDATOR_DEBUG_COLOR,
+			)
 		}
 	}
 
 	when PREDATOR_DRAW_WALL {
-		wall_rect := rl.Rectangle{
+		wall_rect := rl.Rectangle {
 			PREDATOR_WALL_RANGE,
 			PREDATOR_WALL_RANGE,
 			SCREEN_WIDTH - (2 * PREDATOR_WALL_RANGE),
