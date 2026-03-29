@@ -24,4 +24,4 @@ An implementation of [Craig Reynolds boids simulation](https://www.red3d.com/cwr
 
 ## Bugs
 
-- Predators will sometimes be pushed against walls. This is likely caused by predators moving in same direction as boid group
+- Predators will sometimes be pushed against walls. This is likely caused by predators moving in same direction as boid group while at edge of board

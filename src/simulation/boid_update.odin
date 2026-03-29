@@ -11,6 +11,8 @@ get_distance :: proc(boid_1, boid_2: Boid) -> f32 {
 
 // Returns all neighbors of a boid
 get_neighbors :: proc(self: int, boids: []Boid, range, angle: f32) -> []Boid {
+	if len(boids) <= 1 {return {}}
+
 	neighbors := make([dynamic]Boid, 0, len(boids))
 	defer delete(neighbors)
 
@@ -38,6 +40,8 @@ get_neighbors :: proc(self: int, boids: []Boid, range, angle: f32) -> []Boid {
 
 // Returns all boids nearby a boid
 get_boids :: proc(self: Boid, boids: []Boid, range, angle: f32) -> []Boid {
+	if len(boids) == 0 {return {}}
+
 	nearby_boids := make([dynamic]Boid, 0, len(boids))
 	defer delete(nearby_boids)
 
@@ -152,6 +156,7 @@ update_boids :: proc(boids: []Boid, predators: []Boid) {
 		apply_alignment(&boid, neighbors, BOID_ALIGNMENT_PROPORTION)
 		apply_cohesion(&boid, neighbors, BOID_COHESION_PROPORTION)
 		apply_avoid_walls(&boid, BOID_WALL_RANGE, BOID_WALL_AVOIDANCE)
+		boid.vel += previous_velocity / BOID_PREVIOUS_PROPORTION
 		clamp_speed(&boid, BOID_SPEED)
 
 		// Prevents boids sitting still if it is in the center of all nearby boids

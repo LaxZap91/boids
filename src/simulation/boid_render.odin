@@ -60,4 +60,13 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 		}
 		rl.DrawRectangleLinesEx(wall_rect, 4, BOID_DEBUG_COLOR)
 	}
+	when BOID_DRAW_CENTER {
+		average_position: rl.Vector2
+		for boid in boids {
+			average_position += boid.pos
+		}
+		average_position /= f32(len(boids))
+
+		rl.DrawCircleV(average_position, 10, BOID_DEBUG_COLOR)
+	}
 }

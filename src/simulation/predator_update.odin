@@ -20,9 +20,11 @@ update_predators :: proc(predators: []Boid, boids: []Boid) {
 		// Adjusts predator velocity by rules
 		apply_seperation(&predator, neighbors, PREDATOR_SEPERATION_PROPORTION)
 		apply_cohesion(&predator, neighbors, PREDATOR_COHESION_PROPORTION)
+		apply_cohesion(&predator, boids, PREDATOR_CHASE_CENTER_PROPORTION)
 		apply_cohesion(&predator, far_boids, PREDATOR_CHASE_FAR_PROPORTION)
 		apply_cohesion(&predator, close_boids, PREDATOR_CHASE_CLOSE_PROPORTION)
 		apply_avoid_walls(&predator, PREDATOR_WALL_RANGE, PREDATOR_WALL_AVOIDANCE)
+		predator.vel += previous_velocity / PREDATOR_PREVIOUS_PROPORTION
 		clamp_speed(&predator, PREDATOR_SPEED)
 
 		// Prevents predators sitting still if it is in the center of all nearby boids

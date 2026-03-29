@@ -41,7 +41,6 @@ main :: proc() {
 		// Draw
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.WHITE)
-
 		draw_boids(boid_texture, boids)
 		draw_predators(predator_texture, predators)
 
