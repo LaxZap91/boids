@@ -15,21 +15,27 @@ BOID_DEBUG_COLOR :: rl.GREEN
 
 // Enables drawing boid speed line
 BOID_DRAW_SPEED :: false
-// Enables drawing boid neighbor and predator range
+// Enables drawing boid neighbor, predator, and wall range
 BOID_DRAW_RANGE :: false
+// Enables drawing boid neighbor range
+BOID_DRAW_NEIGHBOR_RANGE :: false
+// Enables drawing boid predator range
+BOID_DRAW_PREDATOR_RANGE :: false
+// Enables drawing boid wall range
+BOID_DRAW_WALL_RANGE :: false
 // Enables drawing boid wall
 BOID_DRAW_WALL :: false
 
 // Number of boids to simulate
-BOID_COUNT :: 300
+BOID_COUNT :: 400
 // Speed of boids
-BOID_SPEED :: 30
+BOID_SPEED :: 50
 // Range of boids neighborhood
 BOID_NEIGHBOR_RANGE :: 150
 // Angle of boids neighborhood (-angle, angle)
 BOID_NEIGHBOR_ANGLE :: 135
 // Proportion of velocity adjustement made by boids moving away from each other
-BOID_SEPERATION_PROPORTION :: 45
+BOID_SEPERATION_PROPORTION :: 30
 // Proportion of velocity adjustement made by aligning nearby boids direction
 BOID_ALIGNMENT_PROPORTION :: 6
 // Proportion of veloicty adjustement made by moving boids togeather
@@ -37,9 +43,11 @@ BOID_COHESION_PROPORTION :: 160
 // Range of a boids wall sensing
 BOID_WALL_RANGE :: 200
 // Amount of adjustement made to velocity if the boid is inside a wall
-BOID_WALL_AVOIDANCE :: 20
+BOID_WALL_AVOIDANCE :: 30
 // Range that boids sense predators
 BOID_PREDATOR_RANGE :: 250
+// Angle that boids sense predators (-angle, angle)
+BOID_PREDATOR_ANGLE :: 180
 // Proportion of velocity adjustement made by nearby predators
 BOID_PREDATOR_FLEE_PROPORTION :: 5
 

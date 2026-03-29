@@ -28,10 +28,10 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 			top := rl.Vector2Rotate(rl.Vector2{0, -texture_size.y}, angle) + boid.pos
 			rl.DrawLineEx(top, top + boid.vel, 4, BOID_DEBUG_COLOR)
 		}
-		// Draws range
-		when BOID_DRAW_RANGE {
+		// Draws neighbor range
+		when BOID_DRAW_RANGE || BOID_DRAW_NEIGHBOR_RANGE {
 			angle_offset := angle * rl.RAD2DEG - 90
-			// Draws neighbor range
+
 			rl.DrawCircleSectorLines(
 				boid.pos,
 				BOID_NEIGHBOR_RANGE,
@@ -40,8 +40,14 @@ draw_boids :: proc(texture: rl.Texture2D, boids: []Boid) {
 				1,
 				BOID_DEBUG_COLOR,
 			)
-			// Draw predator range
+		}
+		// Draw predator range
+		when BOID_DRAW_RANGE || BOID_DRAW_PREDATOR_RANGE {
 			rl.DrawCircleLinesV(boid.pos, BOID_PREDATOR_RANGE, BOID_DEBUG_COLOR)
+		}
+		// Draw wall range
+		when BOID_DRAW_RANGE || BOID_DRAW_WALL_RANGE {
+			rl.DrawCircleLinesV(boid.pos, BOID_WALL_RANGE, BOID_DEBUG_COLOR)
 		}
 	}
 

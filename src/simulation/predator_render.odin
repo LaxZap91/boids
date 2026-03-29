@@ -28,10 +28,10 @@ draw_predators :: proc(texture: rl.Texture2D, predators: []Boid) {
 			top := rl.Vector2Rotate(rl.Vector2{0, -texture_size.y}, angle) + predator.pos
 			rl.DrawLineEx(top, top + predator.vel, 4, PREDATOR_DEBUG_COLOR)
 		}
-		// Draws range
-		when PREDATOR_DRAW_RANGE {
+		// Draws neighbor range
+		when PREDATOR_DRAW_RANGE || PREDATOR_DRAW_NEIGHBOR_RANGE {
 			angle_offset := angle * rl.RAD2DEG - 90
-			// Draw neighbor range
+
 			rl.DrawCircleSectorLines(
 				predator.pos,
 				PREDATOR_NEIGHBOR_RANGE,
@@ -40,7 +40,11 @@ draw_predators :: proc(texture: rl.Texture2D, predators: []Boid) {
 				1,
 				PREDATOR_DEBUG_COLOR,
 			)
-			// Draws boid range
+		}
+		// Draw boid range
+		when PREDATOR_DRAW_RANGE || PREDATOR_DRAW_BOID_RANGE {
+			angle_offset := angle * rl.RAD2DEG - 90
+
 			rl.DrawCircleSectorLines(
 				predator.pos,
 				PREDATOR_BOID_RANGE,
@@ -49,12 +53,10 @@ draw_predators :: proc(texture: rl.Texture2D, predators: []Boid) {
 				1,
 				PREDATOR_DEBUG_COLOR,
 			)
-			// Draw wall range
-			rl.DrawCircleLinesV(
-				predator.pos,
-				PREDATOR_WALL_RANGE,
-				PREDATOR_DEBUG_COLOR
-			)
+		}
+		// Draw wall range
+		when PREDATOR_DRAW_RANGE || PREDATOR_DRAW_WALL_RANGE {
+			rl.DrawCircleLinesV(predator.pos, PREDATOR_WALL_RANGE, PREDATOR_DEBUG_COLOR)
 		}
 	}
 

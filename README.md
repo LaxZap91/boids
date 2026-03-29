@@ -19,8 +19,9 @@ An implementation of [Craig Reynolds boids simulation](https://www.red3d.com/cwr
 
 - Fix bugs
 - Move functions into more general functions?
+- Create script to embed sprites
+- Embed sprites
 
 ## Bugs
 
-- Predator velocity can be 0, resulting in a non-existant angle, leading to predators sitting around and sudden changes in velocity. Possible fix is increasing search range if resulting velocity is 0, or increasing/decreasing angle of search
 - Predators will sometimes be pushed against walls. This is likely caused by predators moving in same direction as boid group
