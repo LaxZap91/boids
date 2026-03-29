@@ -27,9 +27,9 @@ BOID_DRAW_WALL_RANGE :: false
 BOID_DRAW_WALL :: false
 
 // Number of boids to simulate
-BOID_COUNT :: 400
+BOID_COUNT :: 350
 // Speed of boids
-BOID_SPEED :: 50
+BOID_SPEED :: 35
 // Range of boids neighborhood
 BOID_NEIGHBOR_RANGE :: 150
 // Angle of boids neighborhood (-angle, angle)
@@ -39,7 +39,7 @@ BOID_SEPERATION_PROPORTION :: 30
 // Proportion of velocity adjustement made by aligning nearby boids direction
 BOID_ALIGNMENT_PROPORTION :: 6
 // Proportion of veloicty adjustement made by moving boids togeather
-BOID_COHESION_PROPORTION :: 160
+BOID_COHESION_PROPORTION :: 140
 // Range of a boids wall sensing
 BOID_WALL_RANGE :: 200
 // Amount of adjustement made to velocity if the boid is inside a wall

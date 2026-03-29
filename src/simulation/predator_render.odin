@@ -45,12 +45,22 @@ draw_predators :: proc(texture: rl.Texture2D, predators: []Boid) {
 		when PREDATOR_DRAW_RANGE || PREDATOR_DRAW_BOID_RANGE {
 			angle_offset := angle * rl.RAD2DEG - 90
 
+			// Draws far search range
 			rl.DrawCircleSectorLines(
 				predator.pos,
-				PREDATOR_BOID_RANGE,
-				-PREDATOR_BOID_ANGLE + angle_offset,
-				PREDATOR_BOID_ANGLE + angle_offset,
-				1,
+				PREDATOR_BOID_FAR_RANGE,
+				-PREDATOR_BOID_FAR_ANGLE + angle_offset,
+				PREDATOR_BOID_FAR_ANGLE + angle_offset,
+				16,
+				PREDATOR_DEBUG_COLOR,
+			)
+			// Draws close search range
+			rl.DrawCircleSectorLines(
+				predator.pos,
+				PREDATOR_BOID_CLOSE_RANGE,
+				-PREDATOR_BOID_CLOSE_ANGLE + angle_offset,
+				PREDATOR_BOID_CLOSE_ANGLE + angle_offset,
+				16,
 				PREDATOR_DEBUG_COLOR,
 			)
 		}

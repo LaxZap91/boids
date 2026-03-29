@@ -13,13 +13,15 @@ update_predators :: proc(predators: []Boid, boids: []Boid) {
 			PREDATOR_NEIGHBOR_RANGE,
 			PREDATOR_NEIGHBOR_ANGLE,
 		)
-		nearby_boids := get_boids(predator, boids, PREDATOR_BOID_RANGE, PREDATOR_BOID_ANGLE)
+		far_boids := get_boids(predator, boids, PREDATOR_BOID_FAR_RANGE, PREDATOR_BOID_FAR_ANGLE)
+		close_boids := get_boids(predator, boids, PREDATOR_BOID_CLOSE_RANGE, PREDATOR_BOID_CLOSE_ANGLE)
 		previous_velocity := predator.vel
 
 		// Adjusts predator velocity by rules
 		apply_seperation(&predator, neighbors, PREDATOR_SEPERATION_PROPORTION)
 		apply_cohesion(&predator, neighbors, PREDATOR_COHESION_PROPORTION)
-		apply_cohesion(&predator, nearby_boids, PREDATOR_CHASE_PROPORTION)
+		apply_cohesion(&predator, far_boids, PREDATOR_CHASE_FAR_PROPORTION)
+		apply_cohesion(&predator, close_boids, PREDATOR_CHASE_CLOSE_PROPORTION)
 		apply_avoid_walls(&predator, PREDATOR_WALL_RANGE, PREDATOR_WALL_AVOIDANCE)
 		clamp_speed(&predator, PREDATOR_SPEED)
 
@@ -30,6 +32,6 @@ update_predators :: proc(predators: []Boid, boids: []Boid) {
 
 		// Moves predator
 		predator.pos += predator.vel
-		clamp_position(&predator)
+		// clamp_position(&predator)
 	}
 }
