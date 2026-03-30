@@ -18,9 +18,8 @@ An implementation of [Craig Reynolds boids simulation](https://www.red3d.com/cwr
 ## TODO
 
 - Fix bugs
+- Make sprites a map that is addressable by path
 - Move functions into more general functions?
-- Create script to embed sprites
-- Embed sprites
 
 ## Bugs
 

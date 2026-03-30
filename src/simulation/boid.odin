@@ -4,8 +4,6 @@ import "core:math"
 import "core:math/rand"
 import rl "vendor:raylib"
 
-// Path to sprite for boid
-BOID_SPRITE_PATH :: "assets/boid.png"
 // Scale of boid sprite
 BOID_SCALE :: 0.25
 // Color that boid gets rendered with

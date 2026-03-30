@@ -96,7 +96,11 @@ export_dir_as_code :: proc(input_dir, output_dir: string) {
 		}
 
 		input_file_name, _ := s.substring_to(info.name, s.index(info.name, fp.ext(info.name)))
-		output_file, _ := os.join_filename(input_file_name, "odin", context.allocator)
+		output_file, _ := os.join_filename(
+			s.concatenate({input_file_name, "_asset"}),
+			"odin",
+			context.allocator,
+		)
 		output_path, _ := os.join_path({output_dir, output_file}, context.allocator)
 		export_file_as_code(info.fullpath, output_path)
 	}

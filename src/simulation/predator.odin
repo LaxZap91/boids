@@ -2,8 +2,6 @@ package simulation
 
 import rl "vendor:raylib"
 
-// Path to sprite for predator
-PREDATOR_SPRITE_PATH :: "assets/boid.png"
 // Scale of predator sprite
 PREDATOR_SCALE :: 0.5
 // Color that predator gets rendered with

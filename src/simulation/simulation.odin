@@ -22,13 +22,13 @@ main :: proc() {
 	rl.SetTargetFPS(TARGET_FPS)
 
 	// Loads boid image
-	boid_image := rl.LoadImage(BOID_SPRITE_PATH)
+	boid_image := rl.LoadImageFromMemory(assets.BOID_EXT, assets.BOID_PTR, assets.BOID_SIZE)
 	defer rl.UnloadImage(boid_image)
 	boid_texture := rl.LoadTextureFromImage(boid_image)
 	defer rl.UnloadTexture(boid_texture)
 
 	// Loads predator image
-	predator_image := rl.LoadImage(PREDATOR_SPRITE_PATH)
+	predator_image := rl.LoadImageFromMemory(assets.BOID_EXT, assets.BOID_PTR, assets.BOID_SIZE)
 	defer rl.UnloadImage(predator_image)
 	predator_texture := rl.LoadTextureFromImage(predator_image)
 	defer rl.UnloadTexture(predator_texture)
