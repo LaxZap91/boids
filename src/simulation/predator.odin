@@ -51,8 +51,8 @@ PREDATOR_BOID_CLOSE_ANGLE :: 100
 // Proportion of velocity adjustment made by far away boids
 PREDATOR_CHASE_FAR_PROPORTION :: 45
 // Proportion of velocity adjustment made by close boids
-PREDATOR_CHASE_CLOSE_PROPORTION :: 30
+PREDATOR_CHASE_CLOSE_PROPORTION :: 70
 // Proportion of velocity adjustment made by the center of all boids
 PREDATOR_CHASE_CENTER_PROPORTION :: -300
 // Proportion of previous velocity to be added
-PREDATOR_PREVIOUS_PROPORTION :: 500
+PREDATOR_PREVIOUS_PROPORTION :: 350

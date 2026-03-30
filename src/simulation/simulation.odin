@@ -1,6 +1,7 @@
 package simulation
 
 import rl "vendor:raylib"
+import "assets"
 
 // Width of the raylib window
 SCREEN_WIDTH :: 2000

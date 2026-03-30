@@ -34,6 +34,6 @@ update_predators :: proc(predators: []Boid, boids: []Boid) {
 
 		// Moves predator
 		predator.pos += predator.vel
-		// clamp_position(&predator)
+		clamp_position(&predator)
 	}
 }
