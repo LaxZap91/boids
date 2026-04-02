@@ -13,7 +13,7 @@ get_distance :: proc(boid_1, boid_2: Boid) -> f32 {
 get_neighbors :: proc(self: int, boids: []Boid, range, angle: f32) -> []Boid {
 	if len(boids) <= 1 {return {}}
 
-	neighbors := make([dynamic]Boid, 0, len(boids))
+	neighbors := make([dynamic]Boid, 0, len(boids), context.temp_allocator)
 	defer delete(neighbors)
 
 	for boid, index in boids {
@@ -42,7 +42,7 @@ get_neighbors :: proc(self: int, boids: []Boid, range, angle: f32) -> []Boid {
 get_boids :: proc(self: Boid, boids: []Boid, range, angle: f32) -> []Boid {
 	if len(boids) == 0 {return {}}
 
-	nearby_boids := make([dynamic]Boid, 0, len(boids))
+	nearby_boids := make([dynamic]Boid, 0, len(boids), context.temp_allocator)
 	defer delete(nearby_boids)
 
 	for boid, index in boids {
@@ -145,6 +145,8 @@ clamp_position :: proc(boid: ^Boid) {
 // Updates boids positions
 update_boids :: proc(boids: []Boid, predators: []Boid) {
 	boids_clone := slice.clone(boids)
+	defer delete(boids_clone)
+
 	for &boid, index in boids {
 		neighbors := get_neighbors(index, boids_clone, BOID_NEIGHBOR_RANGE, BOID_NEIGHBOR_ANGLE)
 		nearby_predators := get_boids(boid, predators, BOID_PREDATOR_RANGE, BOID_PREDATOR_ANGLE)

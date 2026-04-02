@@ -2,35 +2,40 @@ package embed
 
 import "core:fmt"
 import "core:os"
+import "core:slice"
+import "core:flags"
 import fp "core:path/filepath"
 import s "core:strings"
 
-
-INPUT_PATH :: "assets/"
-OUTPUT_PATH :: "src/simulation/assets/"
+IMAGE_EXT :: []string{
+	".png",
+	".jpg",
+	".jpeg",
+}
 
 DATA_WIDTH :: 15
 
-file_as_code := proc(file_path: string, file_data: []byte) -> string {
-	file_ext := fp.ext(file_path)
-	file_base_name := fp.base(file_path)
-	file_name, _ := s.substring_to(file_base_name, s.index(file_base_name, file_ext))
-	file_name_upper := s.to_upper(file_name)
-	file_size := len(file_data)
+image_as_code := proc(image_path: string, image_data: []byte) -> string {
+	image_ext := fp.ext(image_path)
+	image_base_name := fp.base(image_path)
+	image_name, _ := s.substring_to(image_base_name, s.index(image_base_name, image_ext))
+	image_name_upper := s.to_upper(image_name)
+	image_size := len(image_data)
 
 	builder := s.builder_make()
 
 	fmt.sbprintfln(&builder, "package assets\n")
-	fmt.sbprintfln(&builder, "%v_PATH :: `%v`", file_name_upper, file_path)
-	fmt.sbprintfln(&builder, "%v_EXT :: \"%v\"", file_name_upper, file_ext)
-	fmt.sbprintfln(&builder, "%v_SIZE :: %v", file_name_upper, file_size)
+	fmt.sbprintfln(&builder, "%v_PATH :: `%v`", image_name_upper, image_path)
+	fmt.sbprintfln(&builder, "%v_EXT :: \"%v\"", image_name_upper, image_ext)
+	fmt.sbprintfln(&builder, "%v_SIZE :: %v", image_name_upper, image_size)
 	fmt.sbprintfln(&builder, "@(rodata)")
-	fmt.sbprintfln(&builder, "%v_DATA := [%v]byte{{", file_name_upper, file_size)
+	fmt.sbprintfln(&builder, "%v_DATA := [%v]byte{{", image_name_upper, image_size)
 
-	for b, i in file_data {
+	for b, i in image_data {
 		if i % DATA_WIDTH == 0 {
 			fmt.sbprintf(&builder, "\t")
 		}
+
 		fmt.sbprintf(&builder, "%#02X, ", b)
 
 		if i % DATA_WIDTH == (DATA_WIDTH - 1) {
@@ -38,12 +43,12 @@ file_as_code := proc(file_path: string, file_data: []byte) -> string {
 		}
 	}
 
-	if len(file_data) % DATA_WIDTH != 0 {
-		fmt.sbprintfln(&builder, "")
+	if len(image_data) % DATA_WIDTH != 0 {
+		fmt.sbprint(&builder, "\n")
 	}
 
 	fmt.sbprintfln(&builder, "}}")
-	fmt.sbprintfln(&builder, "%v_PTR := raw_data(&%v_DATA)", file_name_upper, file_name_upper)
+	fmt.sbprintfln(&builder, "%v_PTR := raw_data(&%v_DATA)", image_name_upper, image_name_upper)
 
 	return s.to_string(builder)
 }
@@ -58,7 +63,13 @@ export_file_as_code :: proc(input_path, output_path: string) {
 
 	input_path, _ := os.clean_path(input_path, context.allocator)
 
-	code := file_as_code(input_path, input_data)
+	code: string
+	if input_ext := fp.ext(input_path); slice.contains(IMAGE_EXT, input_ext) {
+		code = image_as_code(input_path, input_data)
+	}
+	else {
+		fmt.eprintfln("Extention is unknown: %s", input_ext)
+	}
 
 	output, output_create_file_err := os.create(output_path)
 	if output_create_file_err != os.ERROR_NONE {
@@ -108,6 +119,39 @@ export_dir_as_code :: proc(input_dir, output_dir: string) {
 
 }
 
+flag_checker :: proc(
+	model: rawptr,
+	name: string,
+	value: any,
+	args_tag: string,
+) -> (error: string) {
+	if name == "input" {
+		v := value.(string)
+		if !os.is_directory(v) {
+			error = "Input must be directory."
+		}
+	}
+	else if name == "output" {
+		v := value.(string)
+		if !os.is_directory(v) {
+			error = "Output must be directory."
+		}
+	}
+
+	return
+}
+
 main :: proc() {
-	export_dir_as_code(INPUT_PATH, OUTPUT_PATH)
+	Options :: struct {
+		input: string `args:"pos=0,required" usage:"Input directory."`,
+		output: string `args:"pos=1,required" usage:"Output directory."`,
+	}
+
+	opt: Options
+	style: flags.Parsing_Style = .Odin
+
+	flags.Custom_Flag_Checker(flag_checker)
+	flags.parse_or_exit(&opt, os.args, style)
+
+	export_dir_as_code(opt.input, opt.output)
 }

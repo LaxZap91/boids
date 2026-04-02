@@ -62,7 +62,7 @@ Boid :: struct {
 make_boids :: proc(count: uint, speed: f32) -> []Boid {
 	boids := make([]Boid, count)
 
-	for i in 0 ..< count {
+	for &boid in boids {
 		// Generates random position
 		x := rand.float32_range(0, SCREEN_WIDTH)
 		y := rand.float32_range(0, SCREEN_HEIGHT)
@@ -75,7 +75,7 @@ make_boids :: proc(count: uint, speed: f32) -> []Boid {
 		// Creates boid
 		pos := rl.Vector2{x, y}
 		vel := rl.Vector2{vx, vy}
-		boids[i] = {pos, vel}
+		boid = {pos, vel}
 	}
 
 	return boids

@@ -6,6 +6,8 @@ import rl "vendor:raylib"
 // Updates predator positions
 update_predators :: proc(predators: []Boid, boids: []Boid) {
 	predators_clone := slice.clone(predators)
+	defer delete(predators_clone)
+
 	for &predator, index in predators {
 		neighbors := get_neighbors(
 			index,

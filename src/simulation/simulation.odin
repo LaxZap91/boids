@@ -2,6 +2,8 @@ package simulation
 
 import rl "vendor:raylib"
 import "assets"
+import "core:mem"
+import "core:fmt"
 
 // Width of the raylib window
 SCREEN_WIDTH :: 2000
@@ -11,9 +13,27 @@ SCREEN_HEIGHT :: 2000
 TARGET_FPS :: 60
 
 main :: proc() {
+	when ODIN_DEBUG {
+		track: mem.Tracking_Allocator
+		mem.tracking_allocator_init(&track, context.allocator)
+		context.allocator = mem.tracking_allocator(&track)
+
+		defer {
+			if len(track.allocation_map) > 0 {
+				fmt.eprintf("=== %v allocations not freed: ===\n", len(track.allocation_map))
+				for _, entry in track.allocation_map {
+					fmt.eprintf("- %v bytes @ %v\n", entry.size, entry.location)
+				}
+			}
+			mem.tracking_allocator_destroy(&track)
+		}
+	}
+
 	// Initialize boids
 	boids := make_boids(BOID_COUNT, BOID_SPEED)
+	defer delete(boids)
 	predators := make_boids(PREDATOR_COUNT, PREDATOR_SPEED)
+	defer delete(predators)
 
 	// Raylib initialization
 	rl.SetTraceLogLevel(rl.TraceLogLevel.WARNING)
@@ -46,5 +66,7 @@ main :: proc() {
 		draw_predators(predator_texture, predators)
 
 		rl.EndDrawing()
+
+		free_all(context.temp_allocator)
 	}
 }
