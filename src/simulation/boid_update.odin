@@ -1,17 +1,17 @@
 package simulation
 
-import "core:slice"
 import "core:math"
+import "core:slice"
 import rl "vendor:raylib"
 
 // Returns distance between two boids
 get_distance :: proc(boid_1, boid_2: Boid) -> f32 {
-	return rl.Vector2Distance(boid_1.pos, boid_2.pos)
+	return rl.Vector2DistanceSqrt(boid_1.pos, boid_2.pos)
 }
 
 // Returns all neighbors of a boid
 get_neighbors :: proc(self: int, boids: []Boid, range, angle: f32) -> []Boid {
-	if len(boids) <= 1 {return {}}
+	if len(boids) <= 1 do return {}
 
 	neighbors := make([dynamic]Boid, 0, len(boids), context.temp_allocator)
 	defer delete(neighbors)
@@ -20,12 +20,12 @@ get_neighbors :: proc(self: int, boids: []Boid, range, angle: f32) -> []Boid {
 		if index == self {continue}
 
 		// Adds boid if in range
-		in_range := get_distance(boid, boids[self]) < range
+		in_range := get_distance(boid, boids[self]) < range * range
 
 		// Adds boid if in angle
 		forward := rl.Vector2Normalize(boids[self].vel)
-		other := rl.Vector2Normalize(boid.pos - boids[self].pos)
-		dot_product := rl.Vector2DotProduct(forward, other)
+		toward_boid := rl.Vector2Normalize(boid.pos - boids[self].pos)
+		dot_product := rl.Vector2DotProduct(forward, toward_boid)
 		angle_threshold := math.cos(angle * rl.DEG2RAD)
 		in_angle := dot_product > angle_threshold
 
@@ -40,19 +40,19 @@ get_neighbors :: proc(self: int, boids: []Boid, range, angle: f32) -> []Boid {
 
 // Returns all boids nearby a boid
 get_boids :: proc(self: Boid, boids: []Boid, range, angle: f32) -> []Boid {
-	if len(boids) == 0 {return {}}
+	if len(boids) == 0 do return {}
 
 	nearby_boids := make([dynamic]Boid, 0, len(boids), context.temp_allocator)
 	defer delete(nearby_boids)
 
 	for boid, index in boids {
 		// Adds boid if in range
-		in_range := get_distance(self, boid) < range
+		in_range := get_distance(self, boid) < range * range
 
 		// Adds boid if in angle
 		forward := rl.Vector2Normalize(self.vel)
-		other := rl.Vector2Normalize(boid.pos - self.pos)
-		dot_product := rl.Vector2DotProduct(forward, other)
+		toward_boid := rl.Vector2Normalize(boid.pos - self.pos)
+		dot_product := rl.Vector2DotProduct(forward, toward_boid)
 		angle_threshold := math.cos(angle * rl.DEG2RAD)
 		in_angle := dot_product > angle_threshold
 
@@ -67,7 +67,7 @@ get_boids :: proc(self: Boid, boids: []Boid, range, angle: f32) -> []Boid {
 
 // Moves boid away from neighbors
 apply_seperation :: proc(boid: ^Boid, neighbors: []Boid, proportion: f32) {
-	if len(neighbors) == 0 {return}
+	if len(neighbors) == 0 do return
 
 	// Calculates total displacement
 	displacement: rl.Vector2
@@ -81,7 +81,7 @@ apply_seperation :: proc(boid: ^Boid, neighbors: []Boid, proportion: f32) {
 
 // Aligns boid with neighbors
 apply_alignment :: proc(boid: ^Boid, neighbors: []Boid, proportion: f32) {
-	if len(neighbors) == 0 {return}
+	if len(neighbors) == 0 do return
 
 	// Calculates average velocity
 	average_velocity: rl.Vector2
@@ -96,7 +96,7 @@ apply_alignment :: proc(boid: ^Boid, neighbors: []Boid, proportion: f32) {
 
 // Moves boid closer to neighbor
 apply_cohesion :: proc(boid: ^Boid, neighbors: []Boid, proportion: f32) {
-	if len(neighbors) == 0 {return}
+	if len(neighbors) == 0 do return
 
 	// Calculates average position
 	average_position: rl.Vector2
@@ -112,6 +112,7 @@ apply_cohesion :: proc(boid: ^Boid, neighbors: []Boid, proportion: f32) {
 // Moves boid away from walls
 apply_avoid_walls :: proc(boid: ^Boid, range, avoidance: f32) {
 	velocity_adjustment: rl.Vector2
+
 	// Moves boid if touching horizontal wall
 	if boid.pos.x < range {
 		velocity_adjustment.x = avoidance

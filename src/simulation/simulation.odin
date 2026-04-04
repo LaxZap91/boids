@@ -1,9 +1,9 @@
 package simulation
 
-import rl "vendor:raylib"
 import "assets"
-import "core:mem"
 import "core:fmt"
+import "core:mem"
+import rl "vendor:raylib"
 
 // Width of the raylib window
 SCREEN_WIDTH :: 2000

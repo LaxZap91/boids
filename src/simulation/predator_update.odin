@@ -16,7 +16,12 @@ update_predators :: proc(predators: []Boid, boids: []Boid) {
 			PREDATOR_NEIGHBOR_ANGLE,
 		)
 		far_boids := get_boids(predator, boids, PREDATOR_BOID_FAR_RANGE, PREDATOR_BOID_FAR_ANGLE)
-		close_boids := get_boids(predator, boids, PREDATOR_BOID_CLOSE_RANGE, PREDATOR_BOID_CLOSE_ANGLE)
+		close_boids := get_boids(
+			predator,
+			boids,
+			PREDATOR_BOID_CLOSE_RANGE,
+			PREDATOR_BOID_CLOSE_ANGLE,
+		)
 		previous_velocity := predator.vel
 
 		// Adjusts predator velocity by rules
